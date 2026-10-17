@@ -1,0 +1,121 @@
+services:
+  ministack:
+    image: ministackorg/ministack:latest
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4566/_ministack/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 2s
+    networks:
+      - internal
+
+  database:
+    image: postgres
+    networks:
+      - internal
+    environment:
+      POSTGRES_USER: pguser
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: test
+
+  db_fixture:
+    image: postgres:16-alpine
+    environment:
+      PGPASSWORD: password
+    networks:
+      - internal
+    command: >
+      sh -c "
+        until pg_isready -h database -U pguser ; do
+          echo 'Waiting for database...';
+          sleep 2;
+        done;
+        psql -h database -U pguser -d test < /var/database.dump
+      "
+    volumes:
+      - ./fixture/database.dump:/var/database.dump
+    depends_on:
+      database:
+        condition: service_started
+
+  s3_fixture:
+    image: amazon/aws-cli:2.15.41
+    environment:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_EC2_METADATA_DISABLED: true
+    entrypoint: ["sh", "-c"]
+    networks:
+      - internal
+    command:
+      - |
+        until aws --endpoint-url http://ministack:4566 s3 ls >/dev/null 2>&1; do echo "Waiting for S3..."; sleep 2; done
+        aws --endpoint-url http://ministack:4566 s3api create-bucket --bucket bucket --region us-east-1
+        echo "Bucket added"
+    depends_on:
+      ministack:
+        condition: service_healthy
+
+  sut:
+    environment:
+      AWS_ENDPOINT_URL: http://ministack:4566/
+    image: my-sut:1.0.0
+    networks:
+      - internal
+    depends_on:
+      db_fixture:
+        condition: service_completed_successfully
+      s3_fixture:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/docs"]
+      interval: 3s
+      timeout: 2s
+      retries: 15
+      start_period: 5s
+
+  trigger-sut:
+    image: curlimages/curl
+    command: ["-X", "POST", "http://sut:8080/items?name=trigger"]
+    networks:
+      - internal
+    depends_on:
+      sut:
+        condition: service_healthy
+      s3_fixture:
+        condition: service_completed_successfully
+
+  verification-db:
+     image: postgres
+     networks:
+       - internal
+     environment:
+       PGPASSWORD: password
+     entrypoint: ["sh", "-c"]
+     command:
+      - |
+        [ "$(psql -h database -U pguser -d test -t -c "SELECT COUNT(*) FROM items WHERE name = 'trigger';" | xargs)" -eq 1 ] && echo 'DB contains inserted row — OK' && exit 0 || { echo 'DB does NOT contain inserted row'; exit 1; }
+     depends_on:
+       trigger-sut:
+         condition: service_completed_successfully
+
+  verification-s3:
+     image: amazon/aws-cli
+     environment:
+       AWS_ACCESS_KEY_ID: test
+       AWS_SECRET_ACCESS_KEY: test
+     entrypoint: ["sh", "-c"]
+     networks:
+       - internal
+     command:
+       - |
+         FILE=item-1.txt aws --endpoint-url http://ministack:4566 s3 ls s3://bucket/$$FILE >/dev/null 2>&1 &&
+         echo 'S3 verification OK: file exists' && exit 0;
+         echo 'S3 verification FAILED: file missing' && exit 1;
+     depends_on:
+       trigger-sut:
+         condition: service_completed_successfully
+
+networks:
+  internal: {}

@@ -1,0 +1,10 @@
+.idea/
+.vscode/
+cmake-build*/
+build/
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+summary_log.txt

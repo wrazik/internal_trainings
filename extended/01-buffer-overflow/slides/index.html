@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title> Buffer overflow attack </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./node_modules/reveal.js/dist/reset.css" />
+    <link rel="stylesheet" href="./node_modules/reveal.js/dist/reveal.css" />
+    <link rel="stylesheet" href="./node_modules/reveal.js/dist/theme/white.css" />
+    <link rel="stylesheet" href="./theme/presentation.css" />
+    <link rel="stylesheet" href="./theme/syntax-light.css" />
+<!--    <link rel="stylesheet" href="./node_modules/reveal.js/dist/theme/league.css" />-->
+</head>
+<body>
+<div class="reveal">
+    <div class="slides">
+        <section data-markdown data-separator="^---$" data-separator-vertical="^--$"></section>
+    </div>
+</div>
+
+<script type="module">
+    import Reveal from "./node_modules/reveal.js/dist/reveal.esm.js";
+    import Markdown from "./node_modules/reveal.js/plugin/markdown/markdown.esm.js";
+    import Highlight from "./node_modules/reveal.js/plugin/highlight/highlight.esm.js";
+    import Notes from "./node_modules/reveal.js/plugin/notes/notes.esm.js";
+
+    const params = new URLSearchParams(location.search);
+    const md = params.get("md") || "./slides.md";
+
+    const section = document.querySelector("[data-markdown]");
+    section.setAttribute("data-markdown", md);
+
+    const deck = new Reveal({
+        hash: true,
+        plugins: [Markdown, Highlight],
+        markdown: {
+            smartypants: true
+        },
+        width: "100%",
+        margin: 0.2
+    });
+
+    deck.initialize();
+</script>
+</body>
+</html>

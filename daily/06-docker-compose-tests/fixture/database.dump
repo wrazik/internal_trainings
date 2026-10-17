@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS public.items (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR NOT NULL
+);
+
+INSERT INTO public.items (name) VALUES ('sample1');
+INSERT INTO public.items (name) VALUES ('sample2');

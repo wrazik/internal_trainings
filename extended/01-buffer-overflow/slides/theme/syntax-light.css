@@ -1,0 +1,105 @@
+/* syntax-light.css (v2)
+   Light, high-contrast, nicer colors for C++.
+   Targets the exact classes highlight.js emits (incl. class_ and function_).
+*/
+
+:root{
+    --hl-bg: #f6f8fb;
+    --hl-fg: #111827;
+
+    --hl-gray: #6b7280;      /* comments */
+    --hl-orange: #b45309;    /* keywords / preproc-ish */
+    --hl-orange2: #9a3412;   /* meta */
+    --hl-teal: #0f766e;      /* strings */
+    --hl-blue: #1d4ed8;      /* numbers / builtins */
+    --hl-purple: #6d28d9;    /* types */
+    --hl-rose: #be123c;      /* literals */
+    --hl-class: #0f172a;     /* class names */
+    --hl-func: #075985;      /* function names */
+}
+
+.reveal pre code.hljs{
+    display:block;
+    overflow-x:auto;
+    padding: 0.95em 1.15em;
+    border-radius: 0.7em;
+    background: var(--hl-bg);
+    color: var(--hl-fg);
+}
+
+/* Comments */
+.reveal code.hljs .hljs-comment,
+.reveal code.hljs .hljs-quote{
+    color: var(--hl-gray);
+    font-style: italic;
+}
+
+/* Keywords / control flow / preprocessor directives often end up here */
+.reveal code.hljs .hljs-keyword,
+.reveal code.hljs .hljs-selector-tag{
+    color: var(--hl-orange);
+    font-weight: 600;
+}
+
+/* Strings / chars / regex */
+.reveal code.hljs .hljs-string,
+.reveal code.hljs .hljs-char,
+.reveal code.hljs .hljs-regexp{
+    color: var(--hl-teal);
+}
+
+/* Numbers / builtins */
+.reveal code.hljs .hljs-number,
+.reveal code.hljs .hljs-built_in{
+    color: var(--hl-blue);
+}
+
+/* Types (often used for C++ primitive types in some grammars) */
+.reveal code.hljs .hljs-type{
+    color: var(--hl-purple);
+    font-weight: 600;
+}
+
+/* Literals: true/false/null; some grammars put nullptr here too */
+.reveal code.hljs .hljs-literal{
+    color: var(--hl-rose);
+    font-weight: 600;
+}
+
+/* Function names */
+.reveal code.hljs .hljs-title.function_,
+.reveal code.hljs .hljs-function .hljs-title{
+    color: var(--hl-func);
+    font-weight: 700;
+}
+
+/* Class names (THIS is the one you complained about) */
+.reveal code.hljs .hljs-title.class_,
+.reveal code.hljs .hljs-class .hljs-title{
+    color: var(--hl-class);
+    font-weight: 700;
+}
+
+/* Variables / params */
+.reveal code.hljs .hljs-variable,
+.reveal code.hljs .hljs-params{
+    color: #1f2937;
+}
+
+/* Preprocessor / meta info */
+.reveal code.hljs .hljs-meta,
+.reveal code.hljs .hljs-meta .hljs-keyword{
+    color: var(--hl-orange2);
+}
+
+/* Operators / punctuation (optional: keep subtle, but not black-black) */
+.reveal code.hljs .hljs-operator,
+.reveal code.hljs .hljs-punctuation{
+    color: #374151;
+}
+
+/* Selection */
+.reveal pre code.hljs::selection,
+.reveal pre code.hljs *::selection{
+    background: rgba(245, 166, 35, 0.22);
+}
